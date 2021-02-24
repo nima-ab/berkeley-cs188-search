@@ -330,10 +330,6 @@ class CornersProblem(search.SearchProblem):
         successors = []
         location, visited_corners = state
         x, y = location
-        corners = list(visited_corners)
-
-        if location in self.corners and location not in corners:
-            corners.append(location)
 
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             "*** YOUR CODE HERE ***"
@@ -341,14 +337,21 @@ class CornersProblem(search.SearchProblem):
             next_x, next_y = x + int(dx), y + int(dy)
             hit_walls = self.walls[next_x][next_y]
             next_location = (next_x, next_y)
+            corners = list(visited_corners)
+            cost = 1
 
             if not hit_walls:
-                new_corners = corners.copy()
-                if next_location in self.corners and next_location not in new_corners:
-                    new_corners.append(next_location)
+                if next_location in self.corners and next_location not in corners:
+                    corners.append(next_location)
+                    self.visited_corners[next_location] = True
 
-                next_state = (next_location, tuple(new_corners))
-                successors.append((next_state, action, 1))
+                for corner in self.corners:
+                    if self.visited_corners[corner] and corner not in corners:
+                        cost = 99999999
+                        self.visited_corners[corner] = True
+
+                next_state = (next_location, tuple(corners))
+                successors.append((next_state, action, cost))
 
         self._expanded += 1  # DO NOT CHANGE
         return successors
@@ -384,7 +387,21 @@ def cornersHeuristic(state, problem):
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0  # Default to trivial solution
+    location, visited_corners = state
+    x, y = location
+    manhattans = []
+
+    if problem.isGoalState(state):
+        return 0
+
+    for corner in corners:
+        if corner not in visited_corners:
+            xc, yc = corner
+            manhattan = abs(abs(xc - x) + abs(yc - y))
+
+            manhattans.append(manhattan)
+
+    return min(manhattans)
 
 
 class AStarCornersAgent(SearchAgent):
