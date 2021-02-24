@@ -398,7 +398,6 @@ def cornersHeuristic(state, problem):
         if corner not in visited_corners:
             xc, yc = corner
             manhattan = abs(abs(xc - x) + abs(yc - y))
-
             manhattans.append(manhattan)
 
     return min(manhattans)
@@ -502,7 +501,13 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    food_locations = foodGrid.asList()
+
+    maze_distances = []
+    for food_location in food_locations:
+        maze_distances.append(mazeDistance(position, food_location, problem.startingGameState))
+
+    return sum(maze_distances) / len(maze_distances) if maze_distances else 0
 
 
 class ClosestDotSearchAgent(SearchAgent):
